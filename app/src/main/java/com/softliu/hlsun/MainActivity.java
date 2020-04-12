@@ -18,14 +18,4 @@ public class MainActivity extends UnityPlayerActivity {
         m_activity = this;
         Log.i(TAG, "onCreate: Android Start Success.");
     }
-
-    public int Add(int a, int b)
-    {
-        return a+b;
-    }
-
-    public String GetPackName()
-    {
-        return m_activity.getPackageName();
-    }
 }
