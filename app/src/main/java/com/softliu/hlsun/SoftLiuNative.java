@@ -14,7 +14,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -44,6 +47,7 @@ import com.unity3d.player.UnityPlayer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.security.MessageDigest;
@@ -101,6 +105,42 @@ public class SoftLiuNative {
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
+        }
+        return null;
+    }
+    /*
+    * 获取App的名字
+    * */
+    public String GetAppName() {
+        try {
+            PackageManager packageManager = m_activity.getPackageManager();
+            PackageInfo packageInfo = packageManager.getPackageInfo(m_activity.getPackageName(), 0);
+            int labelRes = packageInfo.applicationInfo.labelRes;
+            return m_activity.getResources().getString(labelRes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 获取图标 bitmap
+     */
+    public byte[] GetIconBytes() {
+        PackageManager packageManager = null;
+        ApplicationInfo applicationInfo = null;
+        try {
+            packageManager = m_activity.getApplicationContext().getPackageManager();
+            applicationInfo = packageManager.getApplicationInfo(m_activity.getPackageName(), 0);
+            Drawable d = packageManager.getApplicationIcon(applicationInfo);
+            BitmapDrawable bd = (BitmapDrawable) d;
+            Bitmap bm = bd.getBitmap();
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            bm.compress(Bitmap.CompressFormat.PNG, 100, byteStream);
+            return byteStream.toByteArray();
+        } catch (PackageManager.NameNotFoundException e) {
+            applicationInfo = null;
+            System.out.println("GetIconBitmap Error: " + e.getMessage());
         }
         return null;
     }
