@@ -5,7 +5,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.UiModeManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,8 +21,6 @@ import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Environment;
@@ -43,9 +40,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.unity3d.player.UnityPlayer;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -91,12 +85,12 @@ public class SoftLiuNative {
         return null;
     }
 
-    public String GetCurrentAPKPath() {
+    public String GetCurrentAppPath() {
         Log.d(TAG, "GetCurrentAPKPath: " + m_activity.getPackageCodePath());
         return m_activity.getPackageCodePath();
     }
 
-    public String GetBuildleVersion() {
+    public String GetCurrentAppVersion() {
         try {
             PackageManager pm = m_activity.getPackageManager();
             if (pm != null) {
@@ -108,10 +102,11 @@ public class SoftLiuNative {
         }
         return null;
     }
+
     /*
-    * 获取App的名字
-    * */
-    public String GetAppName() {
+     * 获取App的名字
+     * */
+    public String GetCurrentAppName() {
         try {
             PackageManager packageManager = m_activity.getPackageManager();
             PackageInfo packageInfo = packageManager.getPackageInfo(m_activity.getPackageName(), 0);
@@ -126,7 +121,7 @@ public class SoftLiuNative {
     /**
      * 获取图标 bitmap
      */
-    public byte[] GetIconBytes() {
+    public byte[] GetCurrentIconBytes() {
         PackageManager packageManager = null;
         ApplicationInfo applicationInfo = null;
         try {
@@ -145,25 +140,6 @@ public class SoftLiuNative {
         return null;
     }
 
-    /*
-     * 获取设备 唯一ID
-     * */
-    public String GetUniqueDeviceIdentifier() {
-        try {
-            TelephonyManager phoneMg = (TelephonyManager) m_activity.getSystemService(Context.TELEPHONY_SERVICE);
-            if (phoneMg != null) {
-                try {
-                    return phoneMg.getDeviceId();
-                } catch (Exception error) {
-                    System.out.println("GetUniqueDeviceIdentifier failed with exception: " + error.getMessage());
-                }
-            }
-        } catch (Exception error) {
-            System.out.println("GetUniqueDeviceIdentifier() Error: " + error.getMessage());
-        }
-        return null;
-    }
-
     @SuppressLint("HardwareIds")
     @TargetApi(Build.VERSION_CODES.CUPCAKE)
     public String GetAndroidID() {
@@ -171,24 +147,6 @@ public class SoftLiuNative {
             return Settings.Secure.getString(m_activity.getContentResolver(), Settings.Secure.ANDROID_ID);
         } catch (Exception error) {
             System.out.println("GetAndroidID() Error: " + error.getMessage());
-        }
-        return null;
-    }
-
-    public String GetMACAddress() {
-        try {
-            WifiManager mgr = (WifiManager) m_activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            if (mgr != null) {
-                WifiInfo info = mgr.getConnectionInfo();
-                if (info != null) {
-                    return info.getMacAddress();
-                }
-                System.out.println("GetMACAddress() getConnectionInfo()==null");
-            } else {
-                System.out.println("GetMACAddress() getSystemService(Context.WIFI_SERVICE)==null");
-            }
-        } catch (Exception e) {
-            System.out.println("GetMACAddress() ERROR:" + e.toString());
         }
         return null;
     }
@@ -273,7 +231,7 @@ public class SoftLiuNative {
     }
 
     @SuppressLint("WrongConstant")
-    public boolean isAppInstalled(String packageName) {
+    public boolean IsAppInstalled(String packageName) {
         PackageManager pm = m_activity.getPackageManager();
         boolean installed = false;
         try {
@@ -286,7 +244,7 @@ public class SoftLiuNative {
     }
 
     @SuppressLint("WrongConstant")
-    public String getAppVersion(String packageName) {
+    public String GetAppVersion(String packageName) {
         PackageManager pm = m_activity.getPackageManager();
         try {
             PackageInfo pi = pm.getPackageInfo(packageName, PackageManager.INSTALL_REASON_POLICY);
@@ -312,7 +270,8 @@ public class SoftLiuNative {
 
     public static int GetNumCertificates() {
         try {
-            @SuppressLint("WrongConstant") PackageInfo packageInfo = m_activity.getPackageManager().getPackageInfo(m_activity.getPackageName(), PackageManager.GET_RESOLVED_FILTER);
+            @SuppressLint("WrongConstant")
+            PackageInfo packageInfo = m_activity.getPackageManager().getPackageInfo(m_activity.getPackageName(), PackageManager.GET_RESOLVED_FILTER);
             return packageInfo.signatures.length;
         } catch (Exception e) {
             Log.e("FGOLNative", "GetNumCertificates failed with exception: " + e.toString());
@@ -329,7 +288,6 @@ public class SoftLiuNative {
                 Log.e("FGOLNative", "GetCertificateSignatureSHA index out of range.");
                 return "";
             }
-
             Signature signature = packageInfo.signatures[index];
             MessageDigest md = MessageDigest.getInstance("SHA");
             md.update(signature.toByteArray());
@@ -355,7 +313,6 @@ public class SoftLiuNative {
         return "";
     }
 
-
     public static boolean HasPermission(String permission) {
         int permissionCheck = ContextCompat.checkSelfPermission(m_activity, permission);
         if (permissionCheck == 0) {
@@ -363,28 +320,6 @@ public class SoftLiuNative {
         }
         return false;
     }
-
-    @RequiresApi(api = Build.VERSION_CODES.FROYO)
-    public static boolean IsAndroidTVDevice() {
-        UiModeManager uiModeManager = (UiModeManager) m_activity.getSystemService(Context.UI_MODE_SERVICE);
-        PackageManager pm = m_activity.getPackageManager();
-        String AMAZON_FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
-        boolean isTV = false;
-
-        if (uiModeManager.getCurrentModeType() == 4) {
-            return true;
-        }
-
-        try {
-            if (pm.hasSystemFeature(AMAZON_FEATURE_FIRE_TV)) {
-                return true;
-            }
-        } catch (Exception localException) {
-        }
-
-        return false;
-    }
-
 
     public static void TryShowPermissionExplanation(final String permissions, final String messageTitle, final String messageInfo) {
         System.out.println("Requesting permissions: " + permissions);
@@ -589,13 +524,6 @@ public class SoftLiuNative {
         return memoryInfo.threshold;
     }
 
-    private final int REFERENCE_SCREEN_HEIGHT = 1080;
-    private final float SPINNER_SCALE = 2.0F;
-    private final int ROTATION_DURATION = 1500;
-
-    private static final String CHECK_OP_NO_THROW = "checkOpNoThrow";
-    private static final String OP_POST_NOTIFICATION = "OP_POST_NOTIFICATION";
-
     public void ToggleSpinner(final boolean enable, final float x, final float y) {
         try {
             Runnable runnable = new Runnable() {
@@ -615,7 +543,7 @@ public class SoftLiuNative {
                         BitmapFactory.Options opt = new BitmapFactory.Options();
                         opt.inJustDecodeBounds = true;
                         BitmapFactory.decodeResource(SoftLiuNative.m_activity.getResources(), R.drawable.spinner, opt);
-                        int spinnerSize = (int) (2.0F * opt.outHeight * screenMetrics.heightPixels / 1080.0F);
+                        int spinnerSize = (int) (opt.outHeight * screenMetrics.heightPixels / 1080.0F);
                         System.out.println("Spinner Width = " + spinnerSize + " Spinner Height = " + spinnerSize);
                         spinnerImage.setLayoutParams(new LinearLayout.LayoutParams(spinnerSize, spinnerSize));
 
@@ -632,8 +560,8 @@ public class SoftLiuNative {
 
                     ImageView spinner = (ImageView) SoftLiuNative.this.m_spinnerLayout.getChildAt(0);
 
-                    int marginLeft = (int) (x * (screenMetrics.widthPixels - spinner.getLayoutParams().height));
-                    int marginTop = (int) (y * (screenMetrics.heightPixels - spinner.getLayoutParams().height));
+                    int marginLeft = (int) (x - spinner.getLayoutParams().width / 2);
+                    int marginTop = (int) (y - spinner.getLayoutParams().height / 2);
 
                     System.out.println("Spinner Input X = " + x + " Spinner Input Y = " + y);
                     System.out.println("Spinner Margin Left = " + marginLeft + " Spinner Margin Top = " + marginTop);
