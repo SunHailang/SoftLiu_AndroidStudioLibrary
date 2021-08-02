@@ -353,8 +353,7 @@ public class SoftLiuNative {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
                                         SoftLiuNative.m_activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-                                        ActivityCompat.requestPermissions(SoftLiuNative.m_activity, permissionsToRequest, SoftLiuNative.PermissionRequestID)
-                                        ;
+                                        ActivityCompat.requestPermissions(SoftLiuNative.m_activity, permissionsToRequest, SoftLiuNative.PermissionRequestID);
                                     }
                                 });
                         builder.show();

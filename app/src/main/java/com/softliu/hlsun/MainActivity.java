@@ -12,6 +12,7 @@ public class MainActivity extends UnityPlayerActivity {
     public static String TAG = "SoftLiu";
 
     public static Activity m_activity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

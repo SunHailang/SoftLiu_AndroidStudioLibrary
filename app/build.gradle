@@ -29,10 +29,13 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core:1.2.0'
+
+    //noinspection GradleCompatible
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    //implementation 'androidx.core:core:1.3.2'
     //implementation 'androidx.appcompat:appcompat:1.1.0'
     //implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     compileOnly files('libs/unity-classes.jar')
     //    网络通信库
-    implementation "com.squareup.okhttp3:okhttp:3.10.0"
+    //implementation "com.squareup.okhttp3:okhttp:3.10.0"
 }
